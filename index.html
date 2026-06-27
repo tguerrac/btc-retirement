@@ -86,11 +86,12 @@
 
   /* ── MAIN LAYOUT ── */
   main {
+    width: 100%;
     max-width: 1400px;
     margin: 0 auto;
     padding: 36px 24px 60px;
     display: grid;
-    grid-template-columns: minmax(300px, 360px) 1fr;
+    grid-template-columns: minmax(300px, 380px) 1fr;
     gap: 28px;
     align-items: start;
   }
@@ -618,48 +619,62 @@
   /* ── CHART INPUT GRIDS ── */
   .chart-inputs-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 12px;
     margin-bottom: 18px;
   }
 
   /* ── RESPONSIVE ── */
 
-  /* Large screens: give more breathing room */
+  /* Large screens */
   @media (min-width: 1400px) {
     main { padding: 40px 40px 80px; }
-    .explainer { padding: 48px 40px 0; }
+    .explainer { padding: 48px 40px 0; max-width: 1400px; }
   }
 
-  /* Medium screens: tablet landscape / small laptop */
-  @media (max-width: 1100px) {
-    main { grid-template-columns: minmax(280px, 320px) 1fr; gap: 20px; }
-    .panel-body { padding: 18px; }
+  /* Medium screens: small laptop / tablet landscape */
+  @media (max-width: 1200px) {
+    main { grid-template-columns: minmax(280px, 340px) 1fr; gap: 20px; }
   }
 
-  /* Small screens: tablet portrait / large phone */
+  /* Tablet portrait / large phone landscape */
   @media (max-width: 860px) {
     main { grid-template-columns: 1fr; padding: 20px 16px 48px; }
     .result-block { grid-template-columns: 1fr 1fr; }
     .right-col { gap: 16px; }
     header { padding: 16px 20px; }
     .pill { display: none; }
-    .chart-canvas-wrap { height: 260px !important; }
+    .chart-canvas-wrap { height: 240px !important; }
+    .explainer { padding: 24px 16px 0; }
+    .steps { grid-template-columns: 1fr 1fr; }
   }
 
-  /* Mobile phones */
+  /* Mobile: prevent horizontal overflow */
   @media (max-width: 600px) {
-    .result-block { grid-template-columns: 1fr 1fr; }
-    .metric-value { font-size: 18px; }
-    .breakdown th, .breakdown td { padding: 9px 10px; font-size: 12px; }
-    .panel-body { padding: 14px; }
+    body { overflow-x: hidden; }
+    main { padding: 16px 12px 48px; }
+    .panel-body { padding: 14px 12px; }
+    .result-block { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .metric { padding: 12px; }
+    .metric-value { font-size: 16px; }
+    .metric-label { font-size: 9px; }
+    .breakdown th, .breakdown td { padding: 8px 8px; font-size: 11px; }
     header h1 { font-size: 14px; }
+    .chart-inputs-grid { grid-template-columns: 1fr 1fr; }
+    .contrib-table td input { width: 70px; }
+    input[type="number"], select { font-size: 14px; }
+    .scenario-btn { padding: 10px 10px; }
+    .scenario-icon { font-size: 16px; }
+    .scenario-name { font-size: 12px; }
+    .chart-canvas-wrap { height: 200px !important; }
   }
 
   /* Very small phones */
   @media (max-width: 400px) {
     .result-block { grid-template-columns: 1fr; }
     .steps { grid-template-columns: 1fr; }
+    .chart-inputs-grid { grid-template-columns: 1fr; }
+    main { padding: 12px 10px 48px; }
   }
 </style>
 </head>
@@ -927,8 +942,7 @@
       </div>
       <div class="panel-body">
         <!-- Contribution inputs inline -->
-        <div class="chart-inputs-grid">
-          <div class="field" style="margin:0">
+        <div class="chart-inputs-grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">\n          <div class="field" style="margin:0">
             <label>BTC já acumulado</label>
             <div class="input-wrap">
               <input type="number" id="btcOwned" value="0" step="0.001" oninput="calc()" placeholder="0.000" style="padding-left:14px">
@@ -945,6 +959,11 @@
             <div class="metric-label">Meta atingida em</div>
             <div class="metric-value" style="font-size:18px" id="metGoalYear">—</div>
             <div class="metric-sub" id="metGoalYearSub">anos de aporte</div>
+          </div>
+          <div class="metric" id="metSustainableCard" style="margin:0;align-self:end;display:none">
+            <div class="metric-label">Custo de vida sustentável</div>
+            <div class="metric-value" style="font-size:18px;color:#60a5fa" id="metSustainable">—</div>
+            <div class="metric-sub">com o BTC que você vai acumular</div>
           </div>
         </div>
 
@@ -993,6 +1012,9 @@
 
         <div class="note" style="margin-top:14px;font-size:11px">
           <strong>Fase 1 — Acumulação (linha laranja):</strong> BTC comprado mensalmente ao preço projetado pela Power Law até a aposentadoria. <strong>Fase 2 — Decumulação (linha vermelha):</strong> saldo de BTC sendo consumido ano a ano para cobrir o custo de vida. A linha verde tracejada marca o piso mínimo de herança. A linha vertical branca separa as duas fases.
+        </div>
+        <div class="note" style="margin-top:10px;font-size:11px;border-color:rgba(239,68,68,0.2);background:rgba(239,68,68,0.04)">
+          <strong style="color:#ef4444">⚠️ Atenção sobre o valor da herança:</strong> o valor em USD da herança é calculado pelo preço projetado do BTC pela Power Law na data final — que pode ser décadas à frente. Projeções tão longas têm incerteza muito alta e devem ser interpretadas como <strong>ordem de grandeza</strong>, não como previsão confiável. O número de BTC herdado é mais relevante que o valor em dólares.
         </div>
       </div>
     </div>
@@ -1597,9 +1619,21 @@ function renderAccumChart(ageNow, retireAge, btcOwned, btcNeeded, scenarioMult,
   if (goalYear) {
     document.getElementById('metGoalYear').textContent = Math.ceil(goalYear).toString();
     document.getElementById('metGoalYearSub').textContent = `em ~${Math.ceil(goalYear - nowYear)} anos de aporte`;
+    document.getElementById('metSustainableCard').style.display = 'none';
   } else {
-    document.getElementById('metGoalYear').textContent = '>' + (nowYear + retireAge - ageNow);
+    document.getElementById('metGoalYear').textContent = '✗';
     document.getElementById('metGoalYearSub').textContent = 'meta não atingida no prazo';
+    // Calculate what lifestyle the actual accumulated BTC can sustain
+    const { retireYears, inflationRate, legacyPct } = getInputs();
+    const legacyFloor = btcStack * (legacyPct / 100);
+    const yearsToRetire = retireAge - ageNow;
+    const sustainable = calcSustainableLifestyle(
+      btcStack, retireCalendarYear, retireYears, inflationRate, scenarioMult, legacyFloor, yearsToRetire
+    );
+    document.getElementById('metSustainableCard').style.display = '';
+    document.getElementById('metSustainable').textContent = sustainable > 0
+      ? fmtUSD(sustainable) + '/ano'
+      : 'insuficiente';
   }
 
   // ── PHASE 2: decumulation (yearly) ───────────────────────────────────
@@ -1779,6 +1813,36 @@ function renderAccumChart(ageNow, retireAge, btcOwned, btcNeeded, scenarioMult,
       animation: { duration: 400 }
     }
   });
+}
+
+// ── SUSTAINABLE LIFESTYLE CALCULATOR ─────────────────────────────────────
+// Given the actual BTC accumulated at retirement, find the max annual cost
+// (in today's USD) that can be sustained for retireYears without going below legacyFloor.
+function calcSustainableLifestyle(btcAtRetirement, retireCalendarYear, retireYears, inflation, scenarioMult, legacyFloor, yearsToRetire) {
+  if (btcAtRetirement <= 0) return 0;
+
+  function simulate(annualCostNow) {
+    const inflatedCost = annualCostNow * Math.pow(1 + inflation, yearsToRetire);
+    let stack = btcAtRetirement;
+    let cost = inflatedCost;
+    for (let i = 0; i < retireYears; i++) {
+      const price = btcPricePowerLaw(retireCalendarYear + i) * scenarioMult;
+      stack -= cost / price;
+      if (stack < legacyFloor) return false; // ran out
+      cost *= (1 + inflation);
+    }
+    return true;
+  }
+
+  // Binary search for max sustainable annual cost in today's USD
+  let lo = 0, hi = 10000000;
+  while (!simulate(hi) === false) hi *= 2; // ensure hi is not already failing — hi starts high
+  // Actually: find max cost where simulation succeeds
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2;
+    if (simulate(mid)) { lo = mid; } else { hi = mid; }
+  }
+  return lo;
 }
 
 // ── IDEAL MONTHLY CONTRIBUTION ────────────────────────────────────────────
