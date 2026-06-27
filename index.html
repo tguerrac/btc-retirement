@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BTC para Aposentadoria</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="BTC Retire">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0a0a0a">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1c1c1c;
+    --border: #2a2a2a;
+    --orange: #F7931A;
+    --orange-dim: rgba(247,147,26,0.15);
+    --orange-glow: rgba(247,147,26,0.4);
+    --text: #f0f0f0;
+    --text-muted: #888;
+    --green: #22c55e;
+    --red: #ef4444;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo-ring {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: var(--orange);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 0 18px var(--orange-glow);
+  }
+  header h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  header p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .pill {
+    margin-left: auto;
+    background: var(--orange-dim);
+    border: 1px solid rgba(247,147,26,0.3);
+    color: var(--orange);
+    font-size: 11px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 36px 24px 60px;
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  /* ── PANEL ── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-header h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .panel-body { padding: 24px; }
+
+  /* ── INPUTS ── */
+  .field { margin-bottom: 22px; }
+  .field:last-child { margin-bottom: 0; }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+  }
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .input-prefix {
+    position: absolute;
+    left: 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--orange);
+    pointer-events: none;
+    z-index: 1;
+  }
+  input[type="number"], select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { display: none; }
+  .has-prefix input[type="number"] { padding-left: 38px; }
+  input[type="number"]:focus, select:focus {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 3px var(--orange-dim);
+  }
+  select option { background: #1c1c1c; }
+
+  /* ── SLIDER ── */
+  .slider-wrap { margin-top: 8px; }
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 4px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--orange);
+    box-shadow: 0 0 8px var(--orange-glow);
+    cursor: pointer;
+  }
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  /* ── RESULT CARD ── */
+  .result-block {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 0;
+  }
+  .metric {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    transition: border-color 0.3s;
+  }
+  .metric.highlight {
+    border-color: rgba(247,147,26,0.5);
+    background: rgba(247,147,26,0.06);
+  }
+  .metric-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+  }
+  .metric-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+    transition: color 0.3s;
+  }
+  .metric.highlight .metric-value { color: var(--orange); }
+  .metric-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* ── GAUGE ── */
+  .gauge-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 24px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .gauge-wrap {
+    position: relative;
+    width: 160px;
+    height: 90px;
+    overflow: hidden;
+  }
+  .gauge-wrap canvas { display: block; }
+  .gauge-center {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    pointer-events: none;
+  }
+  .gauge-number {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--orange);
+    line-height: 1;
+  }
+  .gauge-unit {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'Space Grotesk', sans-serif;
+    margin-top: 2px;
+  }
+  .gauge-label {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  /* ── RIGHT PANEL ── */
+  .right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .chart-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .chart-panel .panel-header { padding: 18px 24px 14px; }
+  .chart-panel .panel-body { padding: 16px 20px 20px; }
+  .chart-canvas-wrap {
+    position: relative;
+    height: 320px;
+  }
+
+  /* ── BREAKDOWN TABLE ── */
+  .breakdown {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .breakdown table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .breakdown thead tr {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .breakdown th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .breakdown td {
+    padding: 11px 16px;
+    border-bottom: 1px solid rgba(42,42,42,0.5);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+  }
+  .breakdown tr:last-child td { border-bottom: none; }
+  .breakdown tr.active-row td { background: rgba(247,147,26,0.07); color: var(--orange); }
+  .breakdown tr:not(.active-row):hover td { background: var(--surface2); }
+  .td-btc { color: var(--orange); font-weight: 700; }
+  .td-age { color: var(--text-muted); }
+
+  /* ── ASSUMPTION NOTE ── */
+  .note {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    padding: 14px 16px;
+    background: rgba(247,147,26,0.04);
+    border: 1px solid rgba(247,147,26,0.1);
+    border-radius: 10px;
+  }
+  .note strong { color: var(--orange); }
+
+
+  /* ── EXPLAINER ── */
+  .explainer {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 0;
+  }
+  .explainer-intro {
+    margin-bottom: 28px;
+  }
+  .explainer-intro h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .explainer-intro p {
+    font-size: 14px;
+    line-height: 1.75;
+    color: #b0b0b0;
+    max-width: 720px;
+  }
+  .explainer-intro p strong { color: var(--orange); font-weight: 600; }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .step::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--orange);
+    opacity: 0.5;
+  }
+  .step-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    opacity: 0.8;
+  }
+  .step-icon {
+    font-size: 22px;
+    margin-bottom: 10px;
+    line-height: 1;
+  }
+  .step h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .step p {
+    font-size: 12px;
+    line-height: 1.65;
+    color: #888;
+  }
+  .step p strong { color: #ccc; font-weight: 500; }
+
+  /* ── SCENARIO SELECTOR ── */
+  .scenario-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .scenario-btn {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    grid-template-rows: auto auto;
+    align-items: center;
+    gap: 0 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.2s, background 0.2s;
+    color: var(--text);
+    width: 100%;
+  }
+  .scenario-btn:hover { border-color: #444; background: #222; }
+  .scenario-btn.active {
+    border-color: var(--orange);
+    background: rgba(247,147,26,0.08);
+  }
+  .scenario-icon {
+    grid-row: 1 / 3;
+    font-size: 20px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .scenario-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1;
+  }
+  .scenario-btn.active .scenario-name { color: var(--orange); }
+  .scenario-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    display: block;
+  }
+
+  /* ── CONTRIBUTION SCHEDULE ── */
+  .contrib-schedule {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .contrib-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .contrib-table-wrap { overflow-x: auto; }
+  .contrib-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .contrib-table thead tr { background: rgba(255,255,255,0.03); }
+  .contrib-table th {
+    padding: 8px 14px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .contrib-table td {
+    padding: 8px 14px;
+    border-top: 1px solid rgba(42,42,42,0.6);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    color: var(--text);
+    vertical-align: middle;
+  }
+  .contrib-table td input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 8px;
+    width: 90px;
+    outline: none;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  .contrib-table td input::-webkit-outer-spin-button,
+  .contrib-table td input::-webkit-inner-spin-button { display: none; }
+  .contrib-table td input:focus {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 2px var(--orange-dim);
+  }
+  .contrib-table .td-age { color: var(--text-muted); font-size: 12px; }
+  .contrib-table .td-actions { text-align: right; white-space: nowrap; }
+  .contrib-action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+    font-size: 14px;
+    opacity: 0.5;
+    transition: opacity 0.15s, background 0.15s;
+    line-height: 1;
+  }
+  .contrib-action-btn:hover { opacity: 1; background: rgba(255,255,255,0.06); }
+  .contrib-action-btn.del:hover { background: rgba(239,68,68,0.15); }
+  .contrib-add-btn {
+    width: 100%;
+    background: none;
+    border: none;
+    border-top: 1px solid var(--border);
+    color: var(--orange);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 11px;
+    cursor: pointer;
+    transition: background 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .contrib-add-btn:hover { background: rgba(247,147,26,0.06); }
+
+  .inflation-note {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--orange);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #a0a0a0;
+    line-height: 1.7;
+  }
+  .inflation-note-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .inflation-note strong { color: #ddd; font-weight: 600; }
+  .inflation-note em { color: #bbb; font-style: italic; }
+  .explainer-disclaimer {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: rgba(247,147,26,0.05);
+    border: 1px solid rgba(247,147,26,0.15);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 36px;
+    font-size: 12px;
+    color: #888;
+    line-height: 1.6;
+  }
+  .explainer-disclaimer span:first-child { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .explainer-disclaimer strong { color: var(--orange); }
+  @media (max-width: 860px) {
+    .steps { grid-template-columns: 1fr 1fr; }
+    .explainer { padding: 28px 16px 0; }
+  }
+  @media (max-width: 500px) {
+    .steps { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 860px) {
+    main { grid-template-columns: 1fr; padding: 20px 16px 48px; }
+    .result-block { grid-template-columns: 1fr 1fr; }
+    header { padding: 16px 20px; }
+    .pill { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-ring">₿</div>
+  <div>
+    <h1>Bitcoin para Aposentadoria</h1>
+    <p>Simulação de decumulação ano a ano — Power Law (Santostasi) + inflação 7% a.a.</p>
+  </div>
+  <div class="pill">Simulador</div>
+</header>
+
+<section class="explainer">
+  <div class="explainer-intro">
+    <h2>Como este cálculo funciona?</h2>
+    <p>
+      Este simulador responde a uma pergunta simples: <strong>quantos bitcoins você precisa ter hoje</strong>
+      para que, ao se aposentar, possa viver do seu patrimônio pelo resto da vida — sem depender de salário,
+      previdência ou trabalho? O cálculo leva em conta quatro fatores reais que a maioria das pessoas ignora.
+    </p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">Passo 1</div>
+      <div class="step-icon">📈</div>
+      <h3>A inflação corrói seu dinheiro</h3>
+      <p>
+        R$100 de hoje não compram a mesma coisa daqui a 20 anos. O simulador projeta
+        <strong>7% de inflação ao ano</strong> sobre o seu custo de vida — então se você gasta
+        $100k/ano hoje, pode precisar de $200k+ na aposentadoria para manter o mesmo padrão.
+      </p>
+    </div>
+    <div class="step">
+      <div class="step-num">Passo 2</div>
+      <div class="step-icon">⚡</div>
+      <h3>O Bitcoin tende a valorizar</h3>
+      <p>
+        O preço do Bitcoin historicamente segue uma <strong>lei de potência (Power Law)</strong>:
+        cresce muito no início e vai desacelerando com o tempo. O simulador usa a regressão
+        de <strong>Giovanni Santostasi</strong> (referência mais citada do modelo) para projetar
+        o preço futuro com base nos dias desde a criação do Bitcoin.
+      </p>
+    </div>
+    <div class="step">
+      <div class="step-num">Passo 3</div>
+      <div class="step-icon">🧮</div>
+      <h3>Simula sua aposentadoria, ano a ano</h3>
+      <p>
+        O simulador "vive" sua aposentadoria virtualmente: a cada ano, vende uma parte do seu
+        BTC para pagar as despesas daquele ano (já com a inflação acumulada), enquanto o
+        <strong>restante do seu BTC continua valorizando</strong> pela Power Law.
+      </p>
+    </div>
+    <div class="step">
+      <div class="step-num">Passo 4</div>
+      <div class="step-icon">🎯</div>
+      <h3>Encontra o número exato</h3>
+      <p>
+        O cálculo testa diferentes quantidades de BTC até achar a <strong>menor que sobrevive</strong>
+        até o fim da sua expectativa de vida sem zerar. Como a quantidade de BTC não muda só
+        por guardá-lo, esse número é o mesmo que você precisa ter <em>hoje</em>.
+      </p>
+    </div>
+  </div>
+
+  <div class="inflation-note">
+    <div class="inflation-note-title">💸 Por que 7% de inflação ao ano?</div>
+    <p>
+      O modelo original (criado por <strong>@sminston_with</strong>) adota 7% ao ano como estimativa de perda
+      real de poder de compra do dinheiro fiduciário — não como uma previsão do IPCA ou do CPI americano oficial,
+      que costumam ficar entre 2% e 4%.
+    </p>
+    <p style="margin-top:10px">
+      A lógica é mais ampla: ao longo de décadas, o custo real de manter um padrão de vida tende a subir
+      mais do que os índices oficiais capturam. Isso acontece porque esses índices não refletem totalmente
+      a expansão monetária dos bancos centrais, a valorização de ativos como imóveis e ações, nem a
+      chamada <em>"inflação de estilo de vida"</em> — a tendência natural de as pessoas gastarem mais
+      conforme envelhecem (saúde, conforto, lazer).
+    </p>
+    <p style="margin-top:10px">
+      Os 7% são, portanto, uma <strong>premissa conservadora e deliberada</strong>: preferível superestimar
+      o quanto você vai precisar do que chegar na aposentadoria com menos do que o necessário.
+    </p>
+  </div>
+
+  <div class="explainer-disclaimer">
+    <span>⚠️</span>
+    <div>
+      <strong>Importante:</strong> Este é um modelo estatístico baseado no comportamento histórico do Bitcoin (Power Law de Santostasi), não uma garantia de retorno.
+      Os parâmetros exatos da regressão variam ligeiramente entre fontes que recalibram o modelo com o tempo — usamos a versão mais recente e melhor documentada disponível.
+      O futuro pode ser diferente do passado. Use como <strong>referência de planejamento</strong>, não como conselho financeiro.
+      Consulte um profissional antes de tomar decisões de investimento.
+    </div>
+  </div>
+</section>
+
+<main>
+  <!-- LEFT: INPUTS -->
+  <div>
+    <div class="panel">
+      <div class="panel-header"><h2>Seus Dados</h2></div>
+      <div class="panel-body">
+
+        <div class="field">
+          <label>Idade atual (anos)</label>
+          <div class="input-wrap">
+            <input type="number" id="ageSlider" value="30" min="10" max="98" step="1" oninput="syncAge(this.value)" placeholder="ex: 30" style="padding-left:14px">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Aposentar com (anos)</label>
+          <div class="input-wrap">
+            <input type="number" id="retireAge" value="65" min="21" max="99" step="1" oninput="calc()" placeholder="ex: 65" style="padding-left:14px">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Custo de vida anual (2025)</label>
+          <select id="annualCost" onchange="calc()">
+            <option value="50000">$50.000 / ano</option>
+            <option value="75000">$75.000 / ano</option>
+            <option value="100000" selected>$100.000 / ano</option>
+            <option value="125000">$125.000 / ano</option>
+            <option value="150000">$150.000 / ano</option>
+            <option value="175000">$175.000 / ano</option>
+            <option value="200000">$200.000 / ano</option>
+            <option value="225000">$225.000 / ano</option>
+            <option value="250000">$250.000 / ano</option>
+            <option value="275000">$275.000 / ano</option>
+            <option value="300000">$300.000 / ano</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Expectativa de vida (anos de aposentadoria)</label>
+          <div class="input-wrap has-prefix">
+            <input type="number" id="retireYears" value="30" step="1" min="10" max="50" oninput="calc()" style="padding-left:14px">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Inflação anual estimada (%) <span style="font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--orange)">★ recomendado: 7%</span></label>
+          <div class="input-wrap has-prefix">
+            <span class="input-prefix">%</span>
+            <input type="number" id="inflationRate" value="7" step="0.5" min="1" max="20" oninput="calc()" style="padding-left:32px">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Cenário da Power Law</label>
+          <div class="scenario-selector">
+            <button class="scenario-btn" id="btn-conservador" onclick="setScenario('conservador')">
+              <span class="scenario-icon">🐻</span>
+              <span class="scenario-name">Conservador</span>
+              <span class="scenario-desc">Piso histórico do canal (0,42×)</span>
+            </button>
+            <button class="scenario-btn active" id="btn-base" onclick="setScenario('base')">
+              <span class="scenario-icon">⚖️</span>
+              <span class="scenario-name">Base</span>
+              <span class="scenario-desc">Linha central (1,0×)</span>
+            </button>
+            <button class="scenario-btn" id="btn-otimista" onclick="setScenario('otimista')">
+              <span class="scenario-icon">🚀</span>
+              <span class="scenario-name">Otimista</span>
+              <span class="scenario-desc">Teto histórico (3,0×)</span>
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /panel-body -->
+
+      <!-- GAUGE -->
+      <div class="gauge-section">
+        <div class="gauge-wrap">
+          <canvas id="gaugeCanvas" width="160" height="90"></canvas>
+          <div class="gauge-center">
+            <div class="gauge-number" id="gaugeNum">—</div>
+            <div class="gauge-unit">BTC</div>
+          </div>
+        </div>
+        <div class="gauge-label" id="gaugeLabel">Preencha os dados acima</div>
+      </div>
+
+      <!-- METRICS (pure BTC result, no price dependency) -->
+      <div class="panel-body" style="padding-top:20px">
+        <div class="result-block">
+          <div class="metric highlight">
+            <div class="metric-label">BTC Necessário Hoje</div>
+            <div class="metric-value" id="metBtc">—</div>
+            <div class="metric-sub">esse é o resultado do modelo</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Faltam</div>
+            <div class="metric-value" id="metGap">—</div>
+            <div class="metric-sub" id="metGapSub">BTC para a meta</div>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top:18px">
+          <strong>Modelo:</strong> simulação de decumulação ano a ano. A quantidade de BTC calculada é a mesma que você precisa ter <strong>hoje</strong> e manter até a aposentadoria — o que muda com o tempo é o preço em USD desse BTC, não a quantidade. Na aposentadoria, você vende uma fração do seu BTC por ano para cobrir o custo de vida (inflacionado a 7% a.a.), enquanto o restante continua valorizando pela <strong>Power Law</strong>, até a expectativa de vida definida.
+        </div>
+      </div>
+
+      <!-- PRICE TRANSLATION (depends on current BTC price, shown after the model result) -->
+      <div class="panel-header" style="border-top:1px solid var(--border)">
+        <h2>Quanto isso custa hoje?</h2>
+      </div>
+      <div class="panel-body">
+
+        <div class="field">
+          <label>Preço BTC hoje (USD) <span id="priceStatus" style="font-size:10px;margin-left:6px;font-weight:400;text-transform:none;letter-spacing:0"></span></label>
+          <div class="input-wrap has-prefix">
+            <span class="input-prefix">$</span>
+            <input type="number" id="btcPrice" value="105000" step="1000" oninput="calc()">
+          </div>
+        </div>
+
+        <div class="result-block">
+          <div class="metric highlight">
+            <div class="metric-label">Custo Hoje</div>
+            <div class="metric-value" id="metBtcSub">—</div>
+            <div class="metric-sub">para comprar o BTC necessário, ao preço atual</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Faltam (em $)</div>
+            <div class="metric-value" id="metGapUsd">—</div>
+            <div class="metric-sub">ao preço de hoje</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">1º ano de aposentadoria custa</div>
+            <div class="metric-value" id="metInflated">—</div>
+            <div class="metric-sub">já com inflação acumulada</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Patrimônio na aposentadoria</div>
+            <div class="metric-value" id="metPatrimonio">—</div>
+            <div class="metric-sub" id="metBtcFutureSub">valor do seu BTC nessa data</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /panel -->
+  </div><!-- /left col -->
+
+  <!-- RIGHT: CHART + TABLE -->
+  <div class="right-col">
+
+    <div class="chart-panel">
+      <div class="panel-header"><h2>BTC Necessário × Custo de Vida</h2></div>
+      <div class="panel-body">
+        <div class="chart-canvas-wrap">
+          <canvas id="mainChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- UNIFIED ACCUMULATION + DECUMULATION CHART -->
+    <div class="chart-panel">
+      <div class="panel-header">
+        <h2>Jornada completa: acumulação → aposentadoria → herança</h2>
+      </div>
+      <div class="panel-body">
+        <!-- Contribution inputs inline -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px">
+          <div class="field" style="margin:0">
+            <label>BTC já acumulado</label>
+            <div class="input-wrap">
+              <input type="number" id="btcOwned" value="0" step="0.001" oninput="calc()" placeholder="0.000" style="padding-left:14px">
+            </div>
+          </div>
+          <div class="field" style="margin:0">
+            <label>Saldo p/ herança (%)</label>
+            <div class="input-wrap has-prefix">
+              <span class="input-prefix">%</span>
+              <input type="number" id="legacyPct" value="20" step="5" min="0" max="80" oninput="calc()" style="padding-left:32px">
+            </div>
+          </div>
+          <div class="metric" style="margin:0;align-self:end">
+            <div class="metric-label">Meta atingida em</div>
+            <div class="metric-value" style="font-size:18px" id="metGoalYear">—</div>
+            <div class="metric-sub" id="metGoalYearSub">anos de aporte</div>
+          </div>
+        </div>
+
+        <!-- CONTRIBUTION SCHEDULE -->
+        <div class="contrib-schedule">
+          <div class="contrib-header">
+            <span>Escala de aportes mensais</span>
+            <span id="suggestedContribHint" style="font-size:11px;color:var(--text-muted)">
+              Sugerido (aporte único): <span id="suggestedContrib" style="color:var(--orange);font-weight:600">—</span>
+              <button onclick="applySuggestedContrib()" style="background:none;border:none;color:var(--orange);font-size:10px;cursor:pointer;text-decoration:underline;padding:0 0 0 4px;font-family:'Space Grotesk',sans-serif">usar</button>
+            </span>
+          </div>
+          <div class="contrib-table-wrap">
+            <table class="contrib-table">
+              <thead>
+                <tr>
+                  <th>Duração (anos)</th>
+                  <th>Aporte/mês (USD)</th>
+                  <th>Idade</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="contribTableBody"></tbody>
+            </table>
+          </div>
+          <button class="contrib-add-btn" onclick="addContribRow()">+ Adicionar período</button>
+        </div>
+
+        <div class="chart-canvas-wrap" style="height:340px">
+          <canvas id="accumChart"></canvas>
+        </div>
+
+        <!-- Legacy metrics below the chart -->
+        <div class="result-block" style="margin-top:16px">
+          <div class="metric">
+            <div class="metric-label">BTC herdado (est.)</div>
+            <div class="metric-value" style="font-size:18px" id="metLegacyBtc">—</div>
+            <div class="metric-sub" id="metLegacySub">saldo residual</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Valor herança (est.)</div>
+            <div class="metric-value" style="font-size:18px" id="metLegacyUsd">—</div>
+            <div class="metric-sub">projeção Power Law</div>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top:14px;font-size:11px">
+          <strong>Fase 1 — Acumulação (linha laranja):</strong> BTC comprado mensalmente ao preço projetado pela Power Law até a aposentadoria. <strong>Fase 2 — Decumulação (linha vermelha):</strong> saldo de BTC sendo consumido ano a ano para cobrir o custo de vida. A linha verde tracejada marca o piso mínimo de herança. A linha vertical branca separa as duas fases.
+        </div>
+      </div>
+    </div>
+
+    <div class="breakdown">
+      <div class="panel-header"><h2>Tabela por Custo de Vida</h2></div>
+      <table id="breakdownTable">
+        <thead>
+          <tr>
+            <th>Aposentar</th>
+            <th>Custo/ano (2025)</th>
+            <th>BTC Necessário</th>
+            <th>Valor Hoje (USD)</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="breakdownBody"></tbody>
+      </table>
+    </div>
+
+  </div><!-- /right col -->
+</main>
+
+<script>
+// ── MODEL ──────────────────────────────────────────────────────────────────
+// Power Law regression by Giovanni Santostasi: Price = A * (days since genesis)^B
+// Calibration: A=1.6e-17, B=5.77 — most recent published refit (Porkopolis/
+// Bitcoin Power Law Explorer, Mar 2026), validated against R²>0.95 historical fit.
+// Note: Santostasi periodically recalibrates A/B as new price data comes in,
+// so small variations exist across sources (A: ~1.0e-17–1.6e-17, B: ~5.77–5.82).
+// Genesis block: Jan 3, 2009
+const GENESIS = new Date('2009-01-03');
+const PL_COEFF = 1.6e-17;
+const PL_EXP = 5.77;
+
+function daysSinceGenesis(date) {
+  return (date - GENESIS) / (1000 * 60 * 60 * 24);
+}
+
+// Projected BTC price for a given calendar year (mid-year point)
+function btcPricePowerLaw(year) {
+  const d = new Date(year, 6, 1); // mid-year
+  const days = daysSinceGenesis(d);
+  return PL_COEFF * Math.pow(days, PL_EXP);
+}
+
+// ── SPEND-DOWN SIMULATION ────────────────────────────────────────────────
+// Given a starting BTC stack AT THE RETIREMENT DATE, simulate year by year:
+// each year the stack is valued at that year's power-law price, the inflated
+// annual cost is withdrawn (sold), and the remaining BTC carries to next year.
+// Returns the ending stack (in BTC) after `retireYears` years.
+function simulateSpendDown(startBtc, retireCalendarYear, annualCostAtRetire, retireYears, inflation, scenarioMult) {
+  let btcStack = startBtc;
+  let costThisYear = annualCostAtRetire;
+  for (let i = 0; i < retireYears; i++) {
+    const yr = retireCalendarYear + i;
+    const price = btcPricePowerLaw(yr) * scenarioMult;
+    const btcToSell = costThisYear / price;
+    btcStack -= btcToSell;
+    if (btcStack < 0) return btcStack;
+    costThisYear *= (1 + inflation);
+  }
+  return btcStack;
+}
+
+// Binary search: find the minimum BTC stack at retirement that survives
+// the entire retirement window.
+function findBtcNeededAtRetirement(retireCalendarYear, annualCostAtRetire, retireYears, inflation, scenarioMult) {
+  let lo = 0;
+  const firstYearPrice = btcPricePowerLaw(retireCalendarYear) * scenarioMult;
+  let hi = (annualCostAtRetire / firstYearPrice) * retireYears * 3 + 1;
+  let guard = 0;
+  while (simulateSpendDown(hi, retireCalendarYear, annualCostAtRetire, retireYears, inflation, scenarioMult) < 0 && guard < 60) {
+    hi *= 2;
+    guard++;
+  }
+  for (let iter = 0; iter < 60; iter++) {
+    const mid = (lo + hi) / 2;
+    const end = simulateSpendDown(mid, retireCalendarYear, annualCostAtRetire, retireYears, inflation, scenarioMult);
+    if (end >= 0) { hi = mid; } else { lo = mid; }
+  }
+  return hi;
+}
+
+// Main entry point: BTC needed TODAY to retire.
+function calcBtcNeeded(ageNow, retireAge, annualCostNow, btcPriceNow, retireYears, inflation = 0.07, scenarioMult = 1.0) {
+  if (ageNow >= retireAge) return null;
+  const yearsToRetire = retireAge - ageNow;
+  const nowYear = new Date().getFullYear();
+  const retireCalendarYear = nowYear + yearsToRetire;
+
+  const inflatedAnnualCost = annualCostNow * Math.pow(1 + inflation, yearsToRetire);
+
+  const btcNeededAtRetirement = findBtcNeededAtRetirement(
+    retireCalendarYear, inflatedAnnualCost, retireYears, inflation, scenarioMult
+  );
+
+  const modelPriceAtRetire = btcPricePowerLaw(retireCalendarYear) * scenarioMult;
+  const usdNeededAtRetirement = btcNeededAtRetirement * modelPriceAtRetire;
+
+  const btcNeededToday = btcNeededAtRetirement;
+
+  return {
+    btcNeeded: btcNeededToday,
+    btcNeededAtRetirement,
+    inflatedAnnualCost,
+    projectedBtcPrice: modelPriceAtRetire,
+    usdNeededAtRetirement,
+    yearsToRetire
+  };
+}
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let mainChartInst = null;
+let currentScenario = 'base';
+
+const SCENARIO_MULTIPLIER = {
+  conservador: 0.42,
+  base: 1.0,
+  otimista: 3.0
+};
+
+// ── CONTRIBUTION SCHEDULE STATE ────────────────────────────────────────────
+// Each entry: { years: number, monthly: number }
+// First row years is always auto-synced to total accumulation period
+let contribSchedule = [{ years: 35, monthly: 500 }];
+
+function renderContribTable() {
+  const { ageNow } = getInputs();
+  const tbody = document.getElementById('contribTableBody');
+  tbody.innerHTML = '';
+  let age = ageNow;
+  contribSchedule.forEach((row, i) => {
+    const startAge = Math.round(age);
+    age += row.years;
+    const endAge = Math.round(age);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="number" value="${row.years}" min="1" max="50" step="1"
+          onblur="commitContribRow(${i},'years',this.value)"
+          onkeydown="if(event.key==='Enter'){this.blur()}"
+          style="width:70px"></td>
+      <td><input type="number" value="${row.monthly}" min="0" step="50"
+          onblur="commitContribRow(${i},'monthly',this.value)"
+          onkeydown="if(event.key==='Enter'){this.blur()}"
+          style="width:100px"></td>
+      <td class="td-age">${startAge}–${endAge} anos</td>
+      <td class="td-actions">
+        <button class="contrib-action-btn del" onclick="deleteContribRow(${i})" title="Remover">🗑</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function commitContribRow(i, field, value) {
+  const parsed = +value || 0;
+  if (contribSchedule[i][field] === parsed) return; // no change, skip redraw
+  contribSchedule[i][field] = parsed;
+  renderContribTable();
+  calc();
+}
+
+function updateContribRow(i, field, value) {
+  commitContribRow(i, field, value);
+}
+
+function deleteContribRow(i) {
+  if (contribSchedule.length <= 1) return; // keep at least one row
+  contribSchedule.splice(i, 1);
+  renderContribTable();
+  calc();
+}
+
+function addContribRow() {
+  const last = contribSchedule[contribSchedule.length - 1];
+  contribSchedule.push({ years: 5, monthly: last ? last.monthly : 500 });
+  renderContribTable();
+  calc();
+}
+
+// Flatten schedule into monthly contributions array
+function flattenSchedule(totalMonths) {
+  const result = [];
+  for (const row of contribSchedule) {
+    const months = Math.round(row.years * 12);
+    for (let m = 0; m < months; m++) result.push(row.monthly);
+    if (result.length >= totalMonths) break;
+  }
+  // Pad with last value if schedule is shorter than totalMonths
+  while (result.length < totalMonths) {
+    result.push(contribSchedule[contribSchedule.length - 1]?.monthly || 0);
+  }
+  return result.slice(0, totalMonths);
+}
+
+
+function setScenario(s) {
+  currentScenario = s;
+  ['conservador', 'base', 'otimista'].forEach(id => {
+    document.getElementById('btn-' + id).classList.toggle('active', id === s);
+  });
+  calc();
+}
+
+function getInputs() {
+  const ageNow = +document.getElementById('ageSlider').value;
+  const retireAge = +document.getElementById('retireAge').value;
+  const annualCost = +document.getElementById('annualCost').value;
+  const btcPrice = +document.getElementById('btcPrice').value || 105000;
+  const btcOwned = +document.getElementById('btcOwned').value || 0;
+  const retireYears = +document.getElementById('retireYears').value || 30;
+  const inflationRate = (+document.getElementById('inflationRate').value || 7) / 100;
+  const scenarioMult = SCENARIO_MULTIPLIER[currentScenario] || 1.0;
+  const legacyPct = +document.getElementById('legacyPct').value || 20;
+  return { ageNow, retireAge, annualCost, btcPrice, btcOwned, retireYears, inflationRate, scenarioMult, legacyPct };
+}
+
+function fmt(n, decimals = 2) {
+  if (n == null || isNaN(n)) return '—';
+  return n.toFixed(decimals);
+}
+function fmtUSD(n) {
+  if (!n || isNaN(n)) return '—';
+  if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+  return '$' + Math.round(n).toLocaleString('pt-BR');
+}
+
+// ── GAUGE ──────────────────────────────────────────────────────────────────
+function drawGauge(fraction) {
+  const canvas = document.getElementById('gaugeCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = 160, H = 90;
+  ctx.clearRect(0, 0, W, H);
+  const cx = W / 2, cy = H - 10, r = 72;
+  const startAngle = Math.PI;
+  const endAngle = 2 * Math.PI;
+  const f = Math.min(1, Math.max(0, fraction));
+
+  // Track
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, startAngle, endAngle);
+  ctx.strokeStyle = '#2a2a2a';
+  ctx.lineWidth = 12;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+  // Fill
+  if (f > 0) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, startAngle, startAngle + f * Math.PI);
+    const grad = ctx.createLinearGradient(cx - r, 0, cx + r, 0);
+    grad.addColorStop(0, '#c06a00');
+    grad.addColorStop(1, '#F7931A');
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 12;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  }
+}
+
+// ── MAIN CALC ──────────────────────────────────────────────────────────────
+function calc() {
+  const { ageNow, retireAge, annualCost, btcPrice, btcOwned, retireYears, inflationRate, scenarioMult, legacyPct } = getInputs();
+
+  // Validate
+  if (ageNow >= retireAge) {
+    document.getElementById('gaugeNum').textContent = '!';
+    document.getElementById('gaugeLabel').textContent = 'Idade de aposentadoria deve ser maior que a atual';
+    drawGauge(0);
+    return;
+  }
+
+  const res = calcBtcNeeded(ageNow, retireAge, annualCost, btcPrice, retireYears, inflationRate, scenarioMult);
+  if (!res) return;
+
+  const { btcNeeded, inflatedAnnualCost, projectedBtcPrice, usdNeededAtRetirement } = res;
+  const gap = Math.max(0, btcNeeded - btcOwned);
+  const fraction = btcOwned / btcNeeded;
+
+  // Gauge
+  drawGauge(fraction);
+  document.getElementById('gaugeNum').textContent = fmt(btcNeeded, btcNeeded < 1 ? 4 : 3);
+  document.getElementById('gaugeLabel').textContent =
+    fraction >= 1
+      ? '🎉 Meta atingida!'
+      : `${(fraction * 100).toFixed(0)}% da meta acumulada`;
+
+  // Metrics
+  document.getElementById('metBtc').textContent = fmt(btcNeeded, btcNeeded < 1 ? 4 : 3);
+  document.getElementById('metBtcSub').textContent = fmtUSD(btcNeeded * btcPrice);
+  document.getElementById('metGap').textContent = gap < 0.0001 ? '0' : fmt(gap, gap < 1 ? 4 : 3);
+  document.getElementById('metGapSub').textContent = gap < 0.0001 ? 'meta atingida' : 'BTC para a meta';
+  document.getElementById('metGapUsd').textContent = fmtUSD(gap * btcPrice);
+  document.getElementById('metInflated').textContent = fmtUSD(inflatedAnnualCost);
+  document.getElementById('metPatrimonio').textContent = fmtUSD(usdNeededAtRetirement);
+  document.getElementById('metBtcFutureSub').textContent = `em ${new Date().getFullYear() + res.yearsToRetire} (preço BTC: ${fmtUSD(projectedBtcPrice)})`;
+
+  // Render chart & table
+  // Calculate and display ideal monthly contribution (single flat rate for reference)
+  _suggestedContrib = calcIdealMonthlyContrib(ageNow, retireAge, btcOwned, btcNeeded, scenarioMult);
+  const suggestedEl = document.getElementById('suggestedContrib');
+  if (_suggestedContrib === 0) {
+    suggestedEl.textContent = 'já atingida com o saldo atual';
+    suggestedEl.style.color = 'var(--green)';
+  } else {
+    suggestedEl.textContent = '$' + _suggestedContrib.toLocaleString('pt-BR') + '/mês';
+    suggestedEl.style.color = 'var(--orange)';
+  }
+
+  // Always keep first contrib row aligned to total accumulation period
+  if (contribSchedule.length === 1) {
+    contribSchedule[0].years = Math.max(1, retireAge - ageNow);
+  }
+
+  // Update contrib table ages
+  renderContribTable();
+
+  renderChart(ageNow, retireAge, retireYears, btcPrice);
+  renderTable(ageNow, retireAge, annualCost, btcPrice, btcOwned, retireYears);
+
+  // Unified accumulation + decumulation chart
+  const nowYear2 = new Date().getFullYear();
+  const retireCalendarYear2 = nowYear2 + res.yearsToRetire;
+  renderAccumChart(ageNow, retireAge, btcOwned, btcNeeded, scenarioMult,
+                   retireCalendarYear2, res.inflatedAnnualCost, retireYears, inflationRate, legacyPct);
+}
+
+// ── CHART ──────────────────────────────────────────────────────────────────
+const COSTS = [50000, 100000, 150000, 200000, 250000, 300000];
+const COST_COLORS = ['#5b5b5b', '#7d7d7d', '#9b9b9b', '#c98a2e', '#F7931A', '#ffc266'];
+
+// Vertical line plugin: draws a dashed marker at the user's current age
+const ageLinePlugin = {
+  id: 'ageLine',
+  afterDraw(chart) {
+    const targetAge = chart.config._currentAge;
+    if (targetAge == null) return;
+    const xScale = chart.scales.x;
+    const yScale = chart.scales.y;
+    const labels = chart.data.labels;
+    // Find closest label index to interpolate x pixel position
+    let idx = labels.findIndex(l => l === targetAge);
+    let xPix;
+    if (idx >= 0) {
+      xPix = xScale.getPixelForValue(idx);
+    } else {
+      // interpolate between nearest labels
+      let lo = 0;
+      while (lo < labels.length - 1 && labels[lo + 1] < targetAge) lo++;
+      const hi = Math.min(lo + 1, labels.length - 1);
+      if (labels[hi] === labels[lo]) { xPix = xScale.getPixelForValue(lo); }
+      else {
+        const frac = (targetAge - labels[lo]) / (labels[hi] - labels[lo]);
+        xPix = xScale.getPixelForValue(lo) + frac * (xScale.getPixelForValue(hi) - xScale.getPixelForValue(lo));
+      }
+    }
+    const ctx = chart.ctx;
+    ctx.save();
+    ctx.beginPath();
+    ctx.setLineDash([4, 4]);
+    ctx.moveTo(xPix, yScale.top);
+    ctx.lineTo(xPix, yScale.bottom);
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // Label
+    ctx.fillStyle = '#cfcfcf';
+    ctx.font = '600 10px "Space Grotesk", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('você: ' + targetAge + ' anos', xPix, yScale.top - 8);
+    ctx.restore();
+  }
+};
+
+function renderChart(ageNow, retireAge, retireYears, btcPrice) {
+  const { annualCost, inflationRate: chartInflation } = getInputs();
+
+  // Higher resolution: every age from 20 to 74
+  const ages = [];
+  for (let a = 20; a <= 74; a++) ages.push(a);
+
+  const datasets = COSTS.map((cost, i) => {
+    const isActive = cost === annualCost;
+    const data = ages.map(a => {
+      if (a >= retireAge) return null;
+      const r = calcBtcNeeded(a, retireAge, cost, btcPrice, retireYears, chartInflation, SCENARIO_MULTIPLIER[currentScenario]);
+      return r ? +r.btcNeeded.toFixed(5) : null;
+    });
+    return {
+      label: '$' + (cost / 1000) + 'k/ano',
+      data,
+      borderColor: isActive ? '#F7931A' : COST_COLORS[i],
+      backgroundColor: isActive ? 'rgba(247,147,26,0.12)' : 'transparent',
+      borderWidth: isActive ? 3 : 1.3,
+      pointRadius: 0,
+      pointHoverRadius: isActive ? 5 : 3,
+      tension: 0.35,
+      fill: isActive,
+      order: isActive ? 0 : 1,
+      shadowBlur: isActive ? 12 : 0,
+    };
+  });
+
+  // Highlight dot for the user's exact position on the active curve
+  const userAgeIdx = ages.indexOf(ageNow);
+  const markerData = ages.map((a, idx) => (idx === userAgeIdx && a < retireAge) ? null : null);
+  let userBtcValue = null;
+  if (ageNow < retireAge) {
+    const r = calcBtcNeeded(ageNow, retireAge, annualCost, btcPrice, retireYears, chartInflation, SCENARIO_MULTIPLIER[currentScenario]);
+    userBtcValue = r ? +r.btcNeeded.toFixed(5) : null;
+  }
+  if (userAgeIdx >= 0) markerData[userAgeIdx] = userBtcValue;
+
+  datasets.push({
+    label: 'Sua posição',
+    data: markerData,
+    borderColor: '#ffffff',
+    backgroundColor: '#ffffff',
+    borderWidth: 2,
+    pointBorderColor: '#0a0a0a',
+    pointRadius: ages.map((a, idx) => idx === userAgeIdx ? 7 : 0),
+    pointHoverRadius: 9,
+    showLine: false,
+    order: -1,
+  });
+
+  if (mainChartInst) mainChartInst.destroy();
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  mainChartInst = new Chart(ctx, {
+    type: 'line',
+    data: { labels: ages, datasets },
+    plugins: [ageLinePlugin],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'nearest', intersect: false, axis: 'x' },
+      layout: { padding: { top: 22 } },
+      scales: {
+        y: {
+          type: 'logarithmic',
+          min: 0.05,
+          max: 50,
+          ticks: {
+            color: '#999',
+            font: { family: 'Space Grotesk', size: 11 },
+            callback: v => {
+              const nice = [0.1, 0.5, 1, 2, 5, 10, 20, 50];
+              return nice.includes(v) ? v + ' ₿' : '';
+            }
+          },
+          grid: { color: 'rgba(255,255,255,0.06)' },
+          border: { color: 'rgba(255,255,255,0.1)' },
+          title: { display: true, text: 'BTC Necessário Hoje (escala log)', color: '#999', font: { family: 'Inter', size: 11 } }
+        },
+        x: {
+          ticks: {
+            color: '#999',
+            font: { family: 'Space Grotesk', size: 11 },
+            maxTicksLimit: 12,
+            callback: function(val, idx) {
+              const age = ages[idx];
+              return (age % 4 === 0) ? age : '';
+            }
+          },
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          border: { color: 'rgba(255,255,255,0.1)' },
+          title: { display: true, text: 'Idade Atual (anos)', color: '#999', font: { family: 'Inter', size: 11 } }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: {
+            color: '#aaa',
+            font: { family: 'Space Grotesk', size: 11, weight: '500' },
+            usePointStyle: true,
+            pointStyle: 'circle',
+            boxWidth: 7,
+            boxHeight: 7,
+            padding: 14,
+            filter: item => item.text !== 'Sua posição'
+          }
+        },
+        tooltip: {
+          backgroundColor: '#1a1a1a',
+          borderColor: 'rgba(247,147,26,0.4)',
+          borderWidth: 1,
+          titleColor: '#F7931A',
+          titleFont: { family: 'Space Grotesk', size: 12, weight: '700' },
+          bodyColor: '#e0e0e0',
+          bodyFont: { family: 'Space Grotesk', size: 11 },
+          padding: 10,
+          cornerRadius: 8,
+          displayColors: true,
+          callbacks: {
+            title: items => `Idade ${items[0].label}`,
+            label: ctx => {
+              if (ctx.parsed.y == null) return null;
+              return ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(4)} BTC`;
+            }
+          }
+        }
+      },
+      animation: { duration: 400, easing: 'easeOutCubic' },
+      elements: {
+        line: { capBezierPoints: true }
+      }
+    }
+  });
+  mainChartInst.config._currentAge = ageNow < retireAge ? ageNow : null;
+}
+
+// ── TABLE ──────────────────────────────────────────────────────────────────
+function renderTable(ageNow, retireAge, annualCost, btcPrice, btcOwned, retireYears) {
+  const { inflationRate: chartInflation } = getInputs();
+  const costs = [50000, 75000, 100000, 125000, 150000, 175000, 200000, 250000, 300000];
+  const body = document.getElementById('breakdownBody');
+  body.innerHTML = '';
+  costs.forEach(cost => {
+    const r = calcBtcNeeded(ageNow, retireAge, cost, btcPrice, retireYears, chartInflation, SCENARIO_MULTIPLIER[currentScenario]);
+    if (!r) return;
+    const btc = r.btcNeeded;
+    const isActive = cost === annualCost;
+    const gap = Math.max(0, btc - btcOwned);
+    const status = btcOwned >= btc
+      ? '<span style="color:var(--green)">✓ Meta atingida</span>'
+      : '<span style="color:var(--text-muted)">−' + fmt(gap, gap < 1 ? 3 : 2) + ' BTC</span>';
+    const tr = document.createElement('tr');
+    if (isActive) tr.className = 'active-row';
+    tr.innerHTML = `
+      <td class="td-age">aos ${retireAge} anos</td>
+      <td>$${(cost / 1000).toFixed(0)}k</td>
+      <td class="td-btc">${fmt(btc, btc < 1 ? 4 : 3)} ₿</td>
+      <td>${fmtUSD(btc * btcPrice)}</td>
+      <td>${status}</td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+
+// ── ACCUMULATION SIMULATION ───────────────────────────────────────────────
+// Simulate monthly BTC purchases from today until retirement.
+// Each month: buy (monthlyUSD / btcPriceThisMonth) BTC at model price.
+// Returns array of { year, btcStack } snapshots.
+function simulateAccumulation(ageNow, retireAge, btcOwned, scenarioMult) {
+  if (ageNow >= retireAge) return [];
+  const nowYear = new Date().getFullYear();
+  const nowMonth = new Date().getMonth();
+  const totalMonths = (retireAge - ageNow) * 12;
+  const schedule = flattenSchedule(totalMonths);
+  let btcStack = btcOwned;
+  const snapshots = [{ year: nowYear + nowMonth / 12, btc: btcStack }];
+  for (let m = 1; m <= totalMonths; m++) {
+    const absMonth = nowMonth + m;
+    const yr = nowYear + absMonth / 12;
+    const targetDate = new Date(Math.floor(yr), Math.round((yr % 1) * 12), 1);
+    const days = (targetDate - new Date(2009, 0, 3)) / (1000 * 60 * 60 * 24);
+    const price = PL_COEFF * Math.pow(days, PL_EXP) * scenarioMult;
+    btcStack += (schedule[m - 1] || 0) / price;
+    if (m % 6 === 0 || m === totalMonths) {
+      snapshots.push({ year: yr, btc: btcStack });
+    }
+  }
+  return snapshots;
+}
+
+// ── UNIFIED JOURNEY CHART (accumulation + decumulation) ─────────────────
+let accumChartInst = null;
+
+function renderAccumChart(ageNow, retireAge, btcOwned, btcNeeded, scenarioMult,
+                          retireCalendarYear, annualCostAtRetire, retireYears, inflation, legacyPct) {
+  const nowYear = new Date().getFullYear();
+  const nowMonth = new Date().getMonth();
+
+  // ── PHASE 1: accumulation (monthly, using schedule) ───────────────────
+  const accumLabels = [];
+  const accumData = [];
+  let btcStack = btcOwned;
+  const totalAccumMonths = (retireAge - ageNow) * 12;
+  const schedule = flattenSchedule(totalAccumMonths);
+  let goalYear = null;
+
+  accumLabels.push(nowYear + nowMonth / 12);
+  accumData.push(+btcStack.toFixed(5));
+
+  for (let m = 1; m <= totalAccumMonths; m++) {
+    const absMonth = nowMonth + m;
+    const yr = nowYear + absMonth / 12;
+    const targetDate = new Date(Math.floor(yr), Math.round((yr % 1) * 12), 1);
+    const days = (targetDate - new Date(2009, 0, 3)) / (1000 * 60 * 60 * 24);
+    const price = PL_COEFF * Math.pow(days, PL_EXP) * scenarioMult;
+    btcStack += (schedule[m - 1] || 0) / price;
+    if (!goalYear && btcStack >= btcNeeded) goalYear = yr;
+    if (m % 6 === 0 || m === totalAccumMonths) {
+      accumLabels.push(+yr.toFixed(2));
+      accumData.push(+btcStack.toFixed(5));
+    }
+  }
+
+  // goal year metric
+  if (goalYear) {
+    document.getElementById('metGoalYear').textContent = Math.ceil(goalYear).toString();
+    document.getElementById('metGoalYearSub').textContent = `em ~${Math.ceil(goalYear - nowYear)} anos de aporte`;
+  } else {
+    document.getElementById('metGoalYear').textContent = '>' + (nowYear + retireAge - ageNow);
+    document.getElementById('metGoalYearSub').textContent = 'meta não atingida no prazo';
+  }
+
+  // ── PHASE 2: decumulation (yearly) ───────────────────────────────────
+  const deculLabels = [];
+  const deculData = [];
+  // Start phase 2 from the actual BTC accumulated at retirement (btcStack = end of phase 1)
+  const btcAtRetirement = btcStack;
+  const legacyFloor = btcAtRetirement * (legacyPct / 100);
+  let deculStack = btcAtRetirement;
+  let costThisYear = annualCostAtRetire;
+
+  for (let i = 0; i <= retireYears; i++) {
+    const yr = retireCalendarYear + i;
+    const label = +(nowYear + (retireAge - ageNow) + i);
+    deculLabels.push(label);
+    deculData.push(+deculStack.toFixed(5));
+    if (i < retireYears) {
+      const price = btcPricePowerLaw(yr) * scenarioMult;
+      const btcToSell = costThisYear / price;
+      // Never draw the stack below the legacy floor
+      deculStack -= btcToSell;
+      if (deculStack < legacyFloor) deculStack = legacyFloor;
+      costThisYear *= (1 + inflation);
+    }
+  }
+
+  // legacy metrics
+  const finalBtc = deculData[deculData.length - 1];
+  const finalYear = retireCalendarYear + retireYears;
+  const finalPrice = btcPricePowerLaw(finalYear) * scenarioMult;
+  document.getElementById('metLegacyBtc').textContent = finalBtc > 0 ? finalBtc.toFixed(4) + ' ₿' : '0 ₿';
+  document.getElementById('metLegacySub').textContent = `aos ${retireAge + retireYears} anos`;
+  document.getElementById('metLegacyUsd').textContent = fmtUSD(finalBtc * finalPrice);
+
+  // ── BUILD UNIFIED CHART ───────────────────────────────────────────────
+  // Merge labels: accum labels (decimal years) + decumulation labels (integer years)
+  // Phase separator year
+  const retireYear = nowYear + (retireAge - ageNow);
+  const allLabels = [...accumLabels, ...deculLabels];
+  // Phase 1: show normally, then null — BUT include the junction point (btcAtRetirement) at retireYear
+  // so the orange line ends exactly where the red line begins
+  const phase1Data = [...accumData, btcAtRetirement, ...Array(deculLabels.length - 1).fill(null)];
+  // Phase 2: null for all accum points EXCEPT the last one (junction), then decum data
+  const phase2Data = [...Array(accumLabels.length - 1).fill(null), btcAtRetirement, ...deculData];
+  const legacyLine = allLabels.map(() => +legacyFloor.toFixed(5));
+  // Goal line: only during accumulation phase
+  const goalLine = [...accumLabels.map(() => +btcNeeded.toFixed(5)), ...Array(deculLabels.length).fill(null)];
+
+  if (accumChartInst) accumChartInst.destroy();
+  const ctx = document.getElementById('accumChart').getContext('2d');
+
+  const grad1 = ctx.createLinearGradient(0, 0, 0, 340);
+  grad1.addColorStop(0, 'rgba(247,147,26,0.3)');
+  grad1.addColorStop(1, 'rgba(247,147,26,0.02)');
+
+  const grad2 = ctx.createLinearGradient(0, 0, 0, 340);
+  grad2.addColorStop(0, 'rgba(239,68,68,0.25)');
+  grad2.addColorStop(1, 'rgba(239,68,68,0.02)');
+
+  // Vertical separator plugin
+  const separatorPlugin = {
+    id: 'phaseSeparator',
+    afterDraw(chart) {
+      const xScale = chart.scales.x;
+      const yScale = chart.scales.y;
+      // Find index of retireYear
+      const idx = allLabels.findIndex(l => Math.round(l) >= retireYear);
+      if (idx < 0) return;
+      const xPix = xScale.getPixelForValue(idx);
+      const ctx2 = chart.ctx;
+      ctx2.save();
+      ctx2.beginPath();
+      ctx2.setLineDash([5, 4]);
+      ctx2.moveTo(xPix, yScale.top);
+      ctx2.lineTo(xPix, yScale.bottom);
+      ctx2.lineWidth = 1.5;
+      ctx2.strokeStyle = 'rgba(255,255,255,0.5)';
+      ctx2.stroke();
+      ctx2.setLineDash([]);
+      ctx2.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx2.font = '600 10px "Space Grotesk", sans-serif';
+      ctx2.textAlign = 'center';
+      ctx2.fillText('aposentadoria ' + retireYear, xPix, yScale.top - 8);
+      ctx2.restore();
+    }
+  };
+
+  accumChartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: allLabels,
+      datasets: [
+        {
+          label: 'Acumulação (fase 1)',
+          data: phase1Data,
+          borderColor: '#F7931A',
+          backgroundColor: grad1,
+          borderWidth: 2.5,
+          pointRadius: 0,
+          tension: 0.35,
+          fill: true,
+          spanGaps: false,
+        },
+        {
+          label: 'Decumulação (fase 2)',
+          data: phase2Data,
+          borderColor: '#ef4444',
+          backgroundColor: grad2,
+          borderWidth: 2.5,
+          pointRadius: 0,
+          tension: 0.35,
+          fill: true,
+          spanGaps: false,
+        },
+        {
+          label: 'Meta (' + (btcNeeded < 1 ? btcNeeded.toFixed(4) : btcNeeded.toFixed(3)) + ' BTC)',
+          data: goalLine,
+          borderColor: '#22c55e',
+          borderWidth: 1.5,
+          borderDash: [6, 4],
+          pointRadius: 0,
+          fill: false,
+          spanGaps: false,
+        },
+        {
+          label: 'Herança mínima (' + legacyPct + '%)',
+          data: legacyLine,
+          borderColor: '#60a5fa',
+          borderWidth: 1.2,
+          borderDash: [3, 5],
+          pointRadius: 0,
+          fill: false,
+        }
+      ]
+    },
+    plugins: [separatorPlugin],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'nearest', intersect: false, axis: 'x' },
+      layout: { padding: { top: 20 } },
+      scales: {
+        y: {
+          ticks: { color: '#999', font: { family: 'Space Grotesk', size: 11 },
+            callback: v => v < 1 ? v.toFixed(3) + ' ₿' : v.toFixed(2) + ' ₿' },
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          title: { display: true, text: 'BTC acumulado', color: '#999', font: { size: 10 } }
+        },
+        x: {
+          ticks: {
+            color: '#999', font: { family: 'Space Grotesk', size: 10 }, maxTicksLimit: 12,
+            callback: (v, i) => {
+              const lbl = allLabels[i];
+              if (lbl == null) return '';
+              return Math.round(lbl);
+            }
+          },
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          title: { display: true, text: 'Ano', color: '#999', font: { size: 10 } }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: { color: '#aaa', font: { family: 'Space Grotesk', size: 11 },
+            usePointStyle: true, boxWidth: 7, boxHeight: 7, padding: 12 }
+        },
+        tooltip: {
+          backgroundColor: '#1a1a1a', borderColor: 'rgba(247,147,26,0.4)', borderWidth: 1,
+          titleColor: '#F7931A', titleFont: { family: 'Space Grotesk', size: 12, weight: '700' },
+          bodyColor: '#e0e0e0', bodyFont: { family: 'Space Grotesk', size: 11 }, padding: 10,
+          callbacks: {
+            title: items => 'Ano ' + Math.round(allLabels[items[0].dataIndex] ?? 0),
+            label: c => c.parsed.y == null ? null : ` ${c.dataset.label.split('(')[0].trim()}: ${c.parsed.y.toFixed(4)} BTC`
+          }
+        }
+      },
+      animation: { duration: 400 }
+    }
+  });
+}
+
+// ── IDEAL MONTHLY CONTRIBUTION ────────────────────────────────────────────
+// Binary search: find the monthly USD contribution that results in exactly
+// btcNeeded accumulated by the retirement date, given the current btcOwned.
+function calcIdealMonthlyContrib(ageNow, retireAge, btcOwned, btcNeeded, scenarioMult) {
+  if (ageNow >= retireAge) return 0;
+  const nowYear = new Date().getFullYear();
+  const nowMonth = new Date().getMonth();
+  const totalMonths = (retireAge - ageNow) * 12;
+
+  function simulate(monthly) {
+    let stack = btcOwned;
+    for (let m = 1; m <= totalMonths; m++) {
+      const absMonth = nowMonth + m;
+      const yr = nowYear + absMonth / 12;
+      const targetDate = new Date(Math.floor(yr), Math.round((yr % 1) * 12), 1);
+      const days = (targetDate - new Date(2009, 0, 3)) / (1000 * 60 * 60 * 24);
+      const price = PL_COEFF * Math.pow(days, PL_EXP) * scenarioMult;
+      stack += monthly / price;
+    }
+    return stack;
+  }
+
+  // If already over the goal with no contributions
+  if (simulate(0) >= btcNeeded) return 0;
+
+  let lo = 0, hi = 1000000;
+  // Ensure hi is enough
+  while (simulate(hi) < btcNeeded) hi *= 2;
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2;
+    simulate(mid) >= btcNeeded ? hi = mid : lo = mid;
+  }
+  return Math.ceil(hi);
+}
+
+let _suggestedContrib = 0;
+
+function applySuggestedContrib() {
+  const { ageNow, retireAge } = getInputs();
+  contribSchedule = [{ years: Math.max(1, retireAge - ageNow), monthly: _suggestedContrib }];
+  renderContribTable();
+  calc();
+}
+
+// ── SYNC ──────────────────────────────────────────────────────────────────
+function syncAge(v) {
+  // Auto-adjust retire age if needed
+  const retireEl = document.getElementById('retireAge');
+  if (+retireEl.value <= +v) {
+    retireEl.value = +v + 1;
+  }
+  calc();
+}
+
+// ── FETCH BTC PRICE ────────────────────────────────────────────────────────
+async function fetchBtcPrice() {
+  const statusEl = document.getElementById('priceStatus');
+  statusEl.textContent = '⟳ buscando...';
+  statusEl.style.color = '#888';
+  try {
+    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+    const data = await res.json();
+    const price = data?.bitcoin?.usd;
+    if (price && price > 0) {
+      document.getElementById('btcPrice').value = price;
+      statusEl.textContent = '● ao vivo';
+      statusEl.style.color = '#22c55e';
+      calc();
+      // refresh every 60s
+      setTimeout(fetchBtcPrice, 60000);
+    } else {
+      throw new Error('no price');
+    }
+  } catch(e) {
+    statusEl.textContent = '● offline — manual';
+    statusEl.style.color = '#F7931A';
+    // retry in 30s
+    setTimeout(fetchBtcPrice, 30000);
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+drawGauge(0);
+renderContribTable();
+calc();
+fetchBtcPrice();
+</script>
+</body>
+</html>
