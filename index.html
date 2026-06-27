@@ -86,11 +86,11 @@
 
   /* ── MAIN LAYOUT ── */
   main {
-    max-width: 1100px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 36px 24px 60px;
     display: grid;
-    grid-template-columns: 360px 1fr;
+    grid-template-columns: minmax(300px, 360px) 1fr;
     gap: 28px;
     align-items: start;
   }
@@ -352,7 +352,7 @@
 
   /* ── EXPLAINER ── */
   .explainer {
-    max-width: 1100px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 40px 24px 0;
   }
@@ -615,11 +615,51 @@
     .steps { grid-template-columns: 1fr; }
   }
 
+  /* ── CHART INPUT GRIDS ── */
+  .chart-inputs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  /* ── RESPONSIVE ── */
+
+  /* Large screens: give more breathing room */
+  @media (min-width: 1400px) {
+    main { padding: 40px 40px 80px; }
+    .explainer { padding: 48px 40px 0; }
+  }
+
+  /* Medium screens: tablet landscape / small laptop */
+  @media (max-width: 1100px) {
+    main { grid-template-columns: minmax(280px, 320px) 1fr; gap: 20px; }
+    .panel-body { padding: 18px; }
+  }
+
+  /* Small screens: tablet portrait / large phone */
   @media (max-width: 860px) {
     main { grid-template-columns: 1fr; padding: 20px 16px 48px; }
     .result-block { grid-template-columns: 1fr 1fr; }
+    .right-col { gap: 16px; }
     header { padding: 16px 20px; }
     .pill { display: none; }
+    .chart-canvas-wrap { height: 260px !important; }
+  }
+
+  /* Mobile phones */
+  @media (max-width: 600px) {
+    .result-block { grid-template-columns: 1fr 1fr; }
+    .metric-value { font-size: 18px; }
+    .breakdown th, .breakdown td { padding: 9px 10px; font-size: 12px; }
+    .panel-body { padding: 14px; }
+    header h1 { font-size: 14px; }
+  }
+
+  /* Very small phones */
+  @media (max-width: 400px) {
+    .result-block { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -887,7 +927,7 @@
       </div>
       <div class="panel-body">
         <!-- Contribution inputs inline -->
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px">
+        <div class="chart-inputs-grid">
           <div class="field" style="margin:0">
             <label>BTC já acumulado</label>
             <div class="input-wrap">
