@@ -1668,9 +1668,9 @@ function renderAccumChart(ageNow, retireAge, btcOwned, btcNeeded, scenarioMult,
     if (i < retireYears) {
       const price = btcPricePowerLaw(yr) * scenarioMult;
       const btcToSell = costThisYear / price;
-      // Never draw the stack below the legacy floor
       deculStack -= btcToSell;
-      if (deculStack < legacyFloor) { deculStack = legacyFloor; break; }
+      // When hitting the legacy floor, clamp and stop spending (but keep drawing)
+      if (deculStack < legacyFloor) deculStack = legacyFloor;
       costThisYear *= (1 + inflation);
     }
   }
