@@ -1077,41 +1077,43 @@ function btcPricePowerLaw(year) {
 // each year the stack is valued at that year's power-law price, the inflated
 // annual cost is withdrawn (sold), and the remaining BTC carries to next year.
 // Returns the ending stack (in BTC) after `retireYears` years.
-function simulateSpendDown(startBtc, retireCalendarYear, annualCostAtRetire, retireYears, inflation, scenarioMult) {
+function simulateSpendDown(startBtc, retireCalendarYear, annualCostAtRetire, retireYears, inflation, scenarioMult, legacyFloorPct = 0) {
   let btcStack = startBtc;
   let costThisYear = annualCostAtRetire;
+  const legacyFloor = startBtc * (legacyFloorPct / 100);
   for (let i = 0; i < retireYears; i++) {
     const yr = retireCalendarYear + i;
     const price = btcPricePowerLaw(yr) * scenarioMult;
     const btcToSell = costThisYear / price;
     btcStack -= btcToSell;
-    if (btcStack < 0) return btcStack;
+    // Fail if stack drops below legacy floor OR goes negative
+    if (btcStack < legacyFloor) return btcStack - legacyFloor; // negative = failed
     costThisYear *= (1 + inflation);
   }
-  return btcStack;
+  return btcStack - legacyFloor; // positive = succeeded with surplus above floor
 }
 
 // Binary search: find the minimum BTC stack at retirement that survives
-// the entire retirement window.
-function findBtcNeededAtRetirement(retireCalendarYear, annualCostAtRetire, retireYears, inflation, scenarioMult) {
+// the entire retirement window AND leaves legacyFloorPct as residual.
+function findBtcNeededAtRetirement(retireCalendarYear, annualCostAtRetire, retireYears, inflation, scenarioMult, legacyFloorPct = 0) {
   let lo = 0;
   const firstYearPrice = btcPricePowerLaw(retireCalendarYear) * scenarioMult;
   let hi = (annualCostAtRetire / firstYearPrice) * retireYears * 3 + 1;
   let guard = 0;
-  while (simulateSpendDown(hi, retireCalendarYear, annualCostAtRetire, retireYears, inflation, scenarioMult) < 0 && guard < 60) {
+  while (simulateSpendDown(hi, retireCalendarYear, annualCostAtRetire, retireYears, inflation, scenarioMult, legacyFloorPct) < 0 && guard < 60) {
     hi *= 2;
     guard++;
   }
   for (let iter = 0; iter < 60; iter++) {
     const mid = (lo + hi) / 2;
-    const end = simulateSpendDown(mid, retireCalendarYear, annualCostAtRetire, retireYears, inflation, scenarioMult);
+    const end = simulateSpendDown(mid, retireCalendarYear, annualCostAtRetire, retireYears, inflation, scenarioMult, legacyFloorPct);
     if (end >= 0) { hi = mid; } else { lo = mid; }
   }
   return hi;
 }
 
 // Main entry point: BTC needed TODAY to retire.
-function calcBtcNeeded(ageNow, retireAge, annualCostNow, btcPriceNow, retireYears, inflation = 0.07, scenarioMult = 1.0) {
+function calcBtcNeeded(ageNow, retireAge, annualCostNow, btcPriceNow, retireYears, inflation = 0.07, scenarioMult = 1.0, legacyPct = 0) {
   if (ageNow >= retireAge) return null;
   const yearsToRetire = retireAge - ageNow;
   const nowYear = new Date().getFullYear();
@@ -1120,7 +1122,7 @@ function calcBtcNeeded(ageNow, retireAge, annualCostNow, btcPriceNow, retireYear
   const inflatedAnnualCost = annualCostNow * Math.pow(1 + inflation, yearsToRetire);
 
   const btcNeededAtRetirement = findBtcNeededAtRetirement(
-    retireCalendarYear, inflatedAnnualCost, retireYears, inflation, scenarioMult
+    retireCalendarYear, inflatedAnnualCost, retireYears, inflation, scenarioMult, legacyPct
   );
 
   const modelPriceAtRetire = btcPricePowerLaw(retireCalendarYear) * scenarioMult;
@@ -1298,7 +1300,7 @@ function calc() {
     return;
   }
 
-  const res = calcBtcNeeded(ageNow, retireAge, annualCost, btcPrice, retireYears, inflationRate, scenarioMult);
+  const res = calcBtcNeeded(ageNow, retireAge, annualCost, btcPrice, retireYears, inflationRate, scenarioMult, legacyPct);
   if (!res) return;
 
   const { btcNeeded, inflatedAnnualCost, projectedBtcPrice, usdNeededAtRetirement } = res;
@@ -1402,7 +1404,7 @@ const ageLinePlugin = {
 };
 
 function renderChart(ageNow, retireAge, retireYears, btcPrice) {
-  const { annualCost, inflationRate: chartInflation } = getInputs();
+  const { annualCost, inflationRate: chartInflation, legacyPct } = getInputs();
 
   // Higher resolution: every age from 20 to 74
   const ages = [];
@@ -1412,7 +1414,7 @@ function renderChart(ageNow, retireAge, retireYears, btcPrice) {
     const isActive = cost === annualCost;
     const data = ages.map(a => {
       if (a >= retireAge) return null;
-      const r = calcBtcNeeded(a, retireAge, cost, btcPrice, retireYears, chartInflation, SCENARIO_MULTIPLIER[currentScenario]);
+      const r = calcBtcNeeded(a, retireAge, cost, btcPrice, retireYears, chartInflation, SCENARIO_MULTIPLIER[currentScenario], legacyPct);
       return r ? +r.btcNeeded.toFixed(5) : null;
     });
     return {
@@ -1435,7 +1437,7 @@ function renderChart(ageNow, retireAge, retireYears, btcPrice) {
   const markerData = ages.map((a, idx) => (idx === userAgeIdx && a < retireAge) ? null : null);
   let userBtcValue = null;
   if (ageNow < retireAge) {
-    const r = calcBtcNeeded(ageNow, retireAge, annualCost, btcPrice, retireYears, chartInflation, SCENARIO_MULTIPLIER[currentScenario]);
+    const r = calcBtcNeeded(ageNow, retireAge, annualCost, btcPrice, retireYears, chartInflation, SCENARIO_MULTIPLIER[currentScenario], legacyPct);
     userBtcValue = r ? +r.btcNeeded.toFixed(5) : null;
   }
   if (userAgeIdx >= 0) markerData[userAgeIdx] = userBtcValue;
@@ -1540,12 +1542,12 @@ function renderChart(ageNow, retireAge, retireYears, btcPrice) {
 
 // ── TABLE ──────────────────────────────────────────────────────────────────
 function renderTable(ageNow, retireAge, annualCost, btcPrice, btcOwned, retireYears) {
-  const { inflationRate: chartInflation } = getInputs();
+  const { inflationRate: chartInflation, legacyPct } = getInputs();
   const costs = [50000, 75000, 100000, 125000, 150000, 175000, 200000, 250000, 300000];
   const body = document.getElementById('breakdownBody');
   body.innerHTML = '';
   costs.forEach(cost => {
-    const r = calcBtcNeeded(ageNow, retireAge, cost, btcPrice, retireYears, chartInflation, SCENARIO_MULTIPLIER[currentScenario]);
+    const r = calcBtcNeeded(ageNow, retireAge, cost, btcPrice, retireYears, chartInflation, SCENARIO_MULTIPLIER[currentScenario], legacyPct);
     if (!r) return;
     const btc = r.btcNeeded;
     const isActive = cost === annualCost;
@@ -1668,7 +1670,7 @@ function renderAccumChart(ageNow, retireAge, btcOwned, btcNeeded, scenarioMult,
       const btcToSell = costThisYear / price;
       // Never draw the stack below the legacy floor
       deculStack -= btcToSell;
-      if (deculStack < legacyFloor) deculStack = legacyFloor;
+      if (deculStack < legacyFloor) { deculStack = legacyFloor; break; }
       costThisYear *= (1 + inflation);
     }
   }
